@@ -1,14 +1,10 @@
 package org.acme.daos.record;
 
 import org.acme.daos.AbstractRecordDAO;
-import org.acme.generated.jooq_testshop.tables.User;
 import org.acme.generated.jooq_testshop.tables.UserRole;
-import org.acme.generated.jooq_testshop.tables.interfaces.IUser;
 import org.acme.generated.jooq_testshop.tables.interfaces.IUserRole;
-import org.acme.generated.jooq_testshop.tables.records.ProductLangRecord;
-import org.acme.generated.jooq_testshop.tables.records.UserRecord;
 import org.acme.generated.jooq_testshop.tables.records.UserRoleRecord;
-import org.acme.jooq.JooqContext;
+import org.jooq.DSLContext;
 import org.jooq.Record2;
 
 /**
@@ -16,8 +12,8 @@ import org.jooq.Record2;
  */
 public class UserRoleRecordDAO extends AbstractRecordDAO<UserRoleRecord, IUserRole, Record2<Integer, String>> {
 
-    public UserRoleRecordDAO(JooqContext jooqContext) {
-        super(jooqContext, UserRole.USER_ROLE);
+    public UserRoleRecordDAO(DSLContext dslContext) {
+        super(dslContext, UserRole.USER_ROLE);
     }
 
     @Override

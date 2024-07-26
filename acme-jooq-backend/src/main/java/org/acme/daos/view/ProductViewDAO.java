@@ -4,31 +4,22 @@ import org.acme.daos.AbstractViewDAO;
 import org.acme.daos.RecordToViewMapper;
 import org.acme.dtos.ProductDTO;
 import org.acme.dtos.ProductLangDTO;
-import org.acme.generated.AbstractDTO;
 import org.acme.generated.jooq_testshop.tables.Product;
 import org.acme.generated.jooq_testshop.tables.ProductLang;
-import org.acme.generated.jooq_testshop.tables.records.ProductLangRecord;
 import org.acme.generated.jooq_testshop.tables.records.ProductRecord;
-import org.acme.jooq.JooqContext;
 import org.jooq.Record;
 import org.jooq.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.groupingBy;
 
 /**
  * ProductViewDAO
  */
 public class ProductViewDAO extends AbstractViewDAO<ProductRecord, ProductDTO, Long> {
 
-    public ProductViewDAO(JooqContext jooqContext) {
+    public ProductViewDAO(DSLContext jooqContext) {
         super(jooqContext, Product.PRODUCT);
     }
 
@@ -70,11 +61,6 @@ public class ProductViewDAO extends AbstractViewDAO<ProductRecord, ProductDTO, L
         for (ProductDTO product : products) {
             final List<ProductLangDTO> productLangs = langs.get(product.getProductId());
             product.setLangs(productLangs);
-            for (ProductLangDTO productLang : productLangs) {
-                if (productLang.getLangId().equals(requestContext().getLangId())) {
-                    product.setLang(productLang);
-                }
-            }
         }
         return products;
     }

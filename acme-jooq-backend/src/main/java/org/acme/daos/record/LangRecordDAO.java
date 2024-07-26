@@ -4,15 +4,15 @@ import org.acme.daos.AbstractRecordDAO;
 import org.acme.generated.jooq_testshop.tables.Lang;
 import org.acme.generated.jooq_testshop.tables.interfaces.ILang;
 import org.acme.generated.jooq_testshop.tables.records.LangRecord;
-import org.acme.jooq.JooqContext;
+import org.jooq.DSLContext;
 
 /**
  * LangRecordDAO
  */
 public class LangRecordDAO extends AbstractRecordDAO<LangRecord, ILang, Integer> {
 
-    public LangRecordDAO(JooqContext jooqContext) {
-        super(jooqContext, Lang.LANG);
+    public LangRecordDAO(DSLContext dslContext) {
+        super(dslContext, Lang.LANG);
     }
 
     @Override

@@ -1,13 +1,11 @@
 package org.acme.daos;
 
 import org.acme.generated.AbstractDTO;
-import org.acme.jooq.JooqContext;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.exception.DataAccessException;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -32,8 +30,8 @@ public abstract class AbstractRecordDAO<R extends UpdatableRecord<R>, Y, T> exte
     // Constructors and initialisation
     // -------------------------------------------------------------------------
 
-    protected AbstractRecordDAO(JooqContext jooqContext, Table<R> table) {
-        super(jooqContext, table);
+    protected AbstractRecordDAO(DSLContext dslContext, Table<R> table) {
+        super(dslContext, table);
     }
 
     // ------------------------------------------------------------------------
@@ -43,7 +41,7 @@ public abstract class AbstractRecordDAO<R extends UpdatableRecord<R>, Y, T> exte
     private List<R> transformToRecords(List<? extends Y> objects) {
         List<R> records = new ArrayList<>();
         boolean isDTO = false;
-        if (objects.size() > 0) {
+        if (!objects.isEmpty()) {
             if (objects.get(0) instanceof AbstractDTO) {
                 isDTO = true;
             }

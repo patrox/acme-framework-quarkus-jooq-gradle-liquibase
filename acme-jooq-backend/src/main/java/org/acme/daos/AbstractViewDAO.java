@@ -1,17 +1,14 @@
 package org.acme.daos;
 
 import org.acme.generated.AbstractDTO;
-import org.acme.jooq.JooqContext;
 import org.acme.util.query.*;
 import org.jooq.Record;
 import org.jooq.*;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 
 import static java.util.stream.Collectors.groupingBy;
 import static org.jooq.impl.DSL.field;
@@ -35,8 +32,8 @@ public abstract class AbstractViewDAO<R extends UpdatableRecord<R>, P extends Ab
     // Constructors and initialisation
     // -------------------------------------------------------------------------
 
-    protected AbstractViewDAO(JooqContext jooqContext, Table<R> table) {
-        super(jooqContext, table);
+    protected AbstractViewDAO(DSLContext dslContext, Table<R> table) {
+        super(dslContext, table);
     }
 
     private SelectJoinStep<Record> getViewQuery() {

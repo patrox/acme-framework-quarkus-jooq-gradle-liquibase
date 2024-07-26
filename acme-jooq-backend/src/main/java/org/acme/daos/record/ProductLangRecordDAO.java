@@ -4,7 +4,7 @@ import org.acme.daos.AbstractRecordDAO;
 import org.acme.generated.jooq_testshop.tables.ProductLang;
 import org.acme.generated.jooq_testshop.tables.interfaces.IProductLang;
 import org.acme.generated.jooq_testshop.tables.records.ProductLangRecord;
-import org.acme.jooq.JooqContext;
+import org.jooq.DSLContext;
 import org.jooq.Record2;
 
 import java.util.List;
@@ -14,8 +14,8 @@ import java.util.List;
  */
 public class ProductLangRecordDAO extends AbstractRecordDAO<ProductLangRecord, IProductLang, Record2<Long, Integer>> {
 
-    public ProductLangRecordDAO(JooqContext jooqContext) {
-        super(jooqContext, ProductLang.PRODUCT_LANG);
+    public ProductLangRecordDAO(DSLContext dslContext) {
+        super(dslContext, ProductLang.PRODUCT_LANG);
     }
 
     @Override

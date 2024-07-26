@@ -7,14 +7,11 @@ import org.acme.daos.record.ProductRecordDAO;
 import org.acme.daos.view.ProductViewDAO;
 import org.acme.dtos.ProductDTO;
 import org.acme.dtos.ProductLangDTO;
-import org.acme.generated.jooq_testshop.tables.Product;
-import org.acme.generated.jooq_testshop.tables.records.ProductLangRecord;
 import org.acme.generated.jooq_testshop.tables.records.ProductRecord;
-import org.acme.jooq.JooqContext;
 import org.acme.jooq.JooqContextFactory;
 import org.acme.util.exception.ValidationException;
 import org.acme.util.query.QueryParameters;
-import org.acme.util.request.RequestContext;
+import org.jooq.DSLContext;
 import org.jooq.exception.DataAccessException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -44,24 +41,21 @@ public class ProductService {
     Validator validator;
 
 
-    public List<ProductDTO> query(final RequestContext requestContext, final QueryParameters queryParameters) {
+    public List<ProductDTO> query(final DSLContext requestContext, final QueryParameters queryParameters) {
         // we use the request-scoped dsl-context as source for the configuration of the dao.
-        JooqContext jooqContext = jooqContextFactory.createJooqContext(requestContext);
-        ProductViewDAO productViewDAO = daoFactory.createProductViewDAO(jooqContext);
+        ProductViewDAO productViewDAO = daoFactory.createProductViewDAO(jooqContextFactory.createJooqContext());
         return productViewDAO.query(queryParameters);
     }
 
-    public Optional<ProductDTO> getOne(final RequestContext requestContext, final Long productId) throws DataAccessException {
-        JooqContext jooqContext = jooqContextFactory.createJooqContext(requestContext);
-        ProductViewDAO productViewDAO = daoFactory.createProductViewDAO(jooqContext);
+    public Optional<ProductDTO> getOne(final DSLContext requestContext, final Long productId) throws DataAccessException {
+        ProductViewDAO productViewDAO = daoFactory.createProductViewDAO(jooqContextFactory.createJooqContext());
         return productViewDAO.findOptionalById(productId);
     }
 
     @Transactional
-    public ProductDTO create(final RequestContext requestContext, final ProductDTO product) throws ValidationException {
-        JooqContext jooqContext = jooqContextFactory.createJooqContext(requestContext);
-        ProductRecordDAO productRecordDAO = daoFactory.createProductRecordDAO(jooqContext);
-        ProductLangRecordDAO productLangRecordDAO = daoFactory.createProductLangRecordDAO(jooqContext);
+    public ProductDTO create(final DSLContext requestContext, final ProductDTO product) throws ValidationException {
+        ProductRecordDAO productRecordDAO = daoFactory.createProductRecordDAO(jooqContextFactory.createJooqContext());
+        ProductLangRecordDAO productLangRecordDAO = daoFactory.createProductLangRecordDAO(jooqContextFactory.createJooqContext());
 
         // Set<ConstraintViolation<ProductDTO>> violations = validator.validate(product);
         // if (!violations.isEmpty()) {
@@ -79,10 +73,9 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDTO update(final RequestContext requestContext, final ProductDTO product) {
-        JooqContext jooqContext = jooqContextFactory.createJooqContext(requestContext);
-        ProductRecordDAO productRecordDAO = daoFactory.createProductRecordDAO(jooqContext);
-        ProductLangRecordDAO productLangRecordDAO = daoFactory.createProductLangRecordDAO(jooqContext);
+    public ProductDTO update(final DSLContext requestContext, final ProductDTO product) {
+        ProductRecordDAO productRecordDAO = daoFactory.createProductRecordDAO(jooqContextFactory.createJooqContext());
+        ProductLangRecordDAO productLangRecordDAO = daoFactory.createProductLangRecordDAO(jooqContextFactory.createJooqContext());
 
         productRecordDAO.updateDTO(product);
 
@@ -111,62 +104,13 @@ public class ProductService {
      * so quarkus can be our transaction-manager.
      */
     @Transactional
-    public void delete(final RequestContext requestContext, final ProductDTO product) {
-        JooqContext jooqContext = jooqContextFactory.createJooqContext(requestContext);
-        ProductRecordDAO productRecordDAO = daoFactory.createProductRecordDAO(jooqContext);
-        ProductLangRecordDAO productLangRecordDAO = daoFactory.createProductLangRecordDAO(jooqContext);
+    public void delete(final DSLContext requestContext, final ProductDTO product) {
+        ProductRecordDAO productRecordDAO = daoFactory.createProductRecordDAO(jooqContextFactory.createJooqContext());
+        ProductLangRecordDAO productLangRecordDAO = daoFactory.createProductLangRecordDAO(jooqContextFactory.createJooqContext());
 
         // we do use the explicit delete-by-id methods here, because they are the most performant.
         productLangRecordDAO.deleteByProductId(product.getProductId());
         productRecordDAO.deleteById(product.getProductId());
-    }
-
-    /**
-     * Trying out streaming
-     *
-     * @param requestContext requestContext
-     * @return stream
-     */
-    public Stream<ProductDTO> streamAll(final RequestContext requestContext) {
-        JooqContext jooqContext = jooqContextFactory.createJooqContext(requestContext);
-        ProductLangRecordDAO productLangRecordDAO = daoFactory.createProductLangRecordDAO(jooqContext);
-
-        // TODO: try to find how this can be put into the Abstraction,
-        Stream<ProductRecord> stream1 = jooqContext.getCtx()
-                .selectFrom(Product.PRODUCT)
-                .fetchSize(250)
-                .fetchStream();
-        Stream<List<ProductRecord>> chunkStream = chunk(stream1, 250);
-
-        // the "parallel" is important here, as it really pushes performance.
-        Stream<ProductDTO> resultStream = chunkStream.parallel().map(records -> {
-            List<Long> ids = new ArrayList<>();
-            for (ProductRecord record : records) {
-                ids.add(record.getProductId());
-            }
-            List<ProductLangRecord> xLangs = productLangRecordDAO.fetchAllByProductsIds(ids);
-
-            List<ProductDTO> products = new ArrayList<>();
-            for (ProductRecord record : records) {
-                ProductDTO product = record.into(new ProductDTO());
-
-                List<ProductLangDTO> productLangs = new ArrayList<>();
-                for (ProductLangRecord lang : xLangs) {
-                    ProductLangDTO productLang = lang.into(new ProductLangDTO());
-                    if (productLang.getProductId().equals(product.getProductId())) {
-                        productLangs.add(productLang);
-                        if (productLang.getLangId().equals(requestContext.getLangId())) {
-                            product.setLang(productLang);
-                        }
-                    }
-                }
-                product.setLangs(productLangs);
-                products.add(product);
-            }
-            return products;
-        }).flatMap(List::stream);
-
-        return resultStream;
     }
 
     /**

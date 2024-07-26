@@ -1,6 +1,5 @@
 package org.acme.jooq;
 
-import org.acme.util.request.RequestContext;
 import org.jooq.Configuration;
 import org.jooq.DSLContext;
 import org.jooq.conf.RenderNameCase;
@@ -21,16 +20,15 @@ public class JooqContextFactory {
     @Inject
     DataSource dataSource;
 
-    public JooqContext createJooqContext(RequestContext requestContext) {
+    public DSLContext createJooqContext() {
         try {
-            DSLContext ctx = DSL.using(getConfiguration(requestContext));
-            return new JooqContext(requestContext, ctx);
+            return DSL.using(getConfiguration());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Configuration getConfiguration(RequestContext requestContext) {
+    private Configuration getConfiguration() {
         Configuration configuration = new DefaultConfiguration()
                 .set(dataSource)
                 .set(new Settings()
@@ -44,7 +42,6 @@ public class JooqContextFactory {
                         .withExecuteLogging(true)
                 );
         configuration.set(new DefaultRecordListenerProvider(new JooqInsertListener()));
-        configuration.set(new DefaultExecuteListenerProvider(new JooqExecuteListener(requestContext)));
         return configuration;
     }
 }

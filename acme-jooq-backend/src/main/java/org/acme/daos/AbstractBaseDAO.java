@@ -1,7 +1,5 @@
 package org.acme.daos;
 
-import org.acme.jooq.JooqContext;
-import org.acme.util.request.RequestContext;
 import org.jooq.*;
 import org.jooq.Record;
 
@@ -22,15 +20,15 @@ import static org.jooq.impl.DSL.row;
  */
 public abstract class AbstractBaseDAO<R extends UpdatableRecord<R>, T> {
 
-    private JooqContext jooqContext;
+    private DSLContext dslContext;
     private final Table<R> table;
 
     // -------------------------------------------------------------------------
     // Constructors and initialisation
     // -------------------------------------------------------------------------
 
-    protected AbstractBaseDAO(JooqContext jooqContext, Table<R> table) {
-        this.jooqContext = jooqContext;
+    protected AbstractBaseDAO(DSLContext dslContext, Table<R> table) {
+        this.dslContext = dslContext;
         this.table = table;
     }
 
@@ -112,16 +110,7 @@ public abstract class AbstractBaseDAO<R extends UpdatableRecord<R>, T> {
      * @return the <code>DAO</code>'s underlying <code>dslContext</code>
      */
     public DSLContext ctx() {
-        return this.jooqContext.getCtx();
-    }
-
-    /**
-     * Expose the requestContext this <code>DAO</code> is operating.
-     *
-     * @return the <code>DAO</code>'s underlying <code>requestContext</code>
-     */
-    public RequestContext requestContext() {
-        return this.jooqContext.getRequestContext();
+        return this.dslContext;
     }
 
     /**

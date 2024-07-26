@@ -4,15 +4,15 @@ import org.acme.daos.AbstractRecordDAO;
 import org.acme.generated.jooq_testshop.tables.Product;
 import org.acme.generated.jooq_testshop.tables.interfaces.IProduct;
 import org.acme.generated.jooq_testshop.tables.records.ProductRecord;
-import org.acme.jooq.JooqContext;
+import org.jooq.DSLContext;
 
 /**
  * ProductRecordDAO
  */
 public class ProductRecordDAO extends AbstractRecordDAO<ProductRecord, IProduct, Long> {
 
-    public ProductRecordDAO(JooqContext jooqContext) {
-        super(jooqContext, Product.PRODUCT);
+    public ProductRecordDAO(DSLContext dslContext) {
+        super(dslContext, Product.PRODUCT);
     }
 
     @Override
